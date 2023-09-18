@@ -3,6 +3,8 @@ import { TODO } from "../models/todos";
 const router = Router();
 
 const todos: Record<string, TODO> = {};
+type RequestBody = { text: string };
+type RequestParams = { todoId: string };
 
 router.get('/', (req, res, next) => {
     if(todos){
@@ -14,33 +16,33 @@ router.get('/', (req, res, next) => {
 });
 
 router.post('/todo', (req, res, next) => {
-    const text = req.body.text;
+    const body = req.body as RequestBody;
     const id = new Date().toISOString();
-    const newTodo: TODO = {id, text};
+    const newTodo: TODO = {id, text: body.text};
 
     todos[id] = newTodo;
 
     res.status(200).json({message: 'Data Saved Successfully!'});
 });
 
-router.delete('/delete/:deletId', (req, res, next) => {
-    const id = req.params.deletId;
-    const data = todos[id];
+router.delete('/delete/:todoId', (req, res, next) => {
+    const params = req.params as RequestParams;
+    const data = todos[params.todoId];
     if (data){
-        delete todos[id];
+        delete todos[params.todoId];
         res.status(200).json({message: 'Data Deleted Successfully!'})
     }else{    
         res.status(404).json({message: 'Delete Id not found!'});
     }
 });
 
-router.put('/edit/:editId', (req, res, next) => {
-    const id = req.params.editId;
-    const text = req.body.text;
+router.put('/edit/:todoId', (req, res, next) => {
+    const params = req.params as RequestParams;
+    const body = req.body as RequestBody;
 
-    const data = todos[id];
+    const data = todos[params.todoId];
     if(data){
-        data.text = text;
+        data.text = body.text;
         return res.status(200).json({ message: 'Edited Successfully!' });
     }
     res.status(404).json({message: 'Edit Id not found!'});
